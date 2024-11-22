@@ -8,6 +8,11 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
+app.use((req, res, next) => {
+    res.setHeader('Permissions-Policy', 'geolocation=(self), microphone=()');
+    next();
+});
+
 // Ruta para obtener información del video
 app.get('/info', async (req, res) => {
     try {
