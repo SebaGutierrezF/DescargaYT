@@ -6,6 +6,7 @@ const { PassThrough } = require('stream');
 class VideoDownloader {
     constructor() {
         this.app = express();
+        this.server = null;
         this.setupMiddleware();
         this.setupRoutes();
     }
@@ -17,8 +18,8 @@ class VideoDownloader {
     }
 
     setupRoutes() {
-        this.app.get('/info', this.getVideoInfo);
-        this.app.get('/download', this.downloadVideo);
+        this.app.get('/info', this.getVideoInfo.bind(this));
+        this.app.get('/download', this.downloadVideo.bind(this));
     }
 
     async getVideoInfo(req, res) {
@@ -100,11 +101,32 @@ class VideoDownloader {
     }
 
     start(port = 3000) {
-        this.app.listen(port, () => {
-            console.log(`Servidor corriendo en http://localhost:${port}`);
+        return new Promise((resolve) => {
+            this.server = this.app.listen(port, () => {
+                console.log(`Servidor corriendo en http://localhost:${port}`);
+                resolve(this.server);
+            });
+        });
+    }
+
+    stop() {
+        return new Promise((resolve) => {
+            if (this.server) {
+                this.server.close(() => {
+                    this.server = null;
+                    resolve();
+                });
+            } else {
+                resolve();
+            }
         });
     }
 }
 
-const downloader = new VideoDownloader();
-downloader.start(); 
+// Solo exportamos la clase si no estamos en el entorno principal
+if (require.main !== module) {
+    module.exports = { VideoDownloader };
+} else {
+    const downloader = new VideoDownloader();
+    downloader.start();
+} 

@@ -3,9 +3,15 @@ const { VideoDownloader } = require('../server');
 
 describe('VideoDownloader', () => {
     let downloader;
+    let server;
     
-    beforeEach(() => {
+    beforeEach(async () => {
         downloader = new VideoDownloader();
+        server = await downloader.start(3001); // Puerto diferente para tests
+    });
+
+    afterEach(async () => {
+        await downloader.stop();
     });
 
     describe('GET /info', () => {
