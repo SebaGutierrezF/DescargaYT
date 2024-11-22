@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Descarga YouTube</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Descarga de YouTube</h1>
+        
+        <div class="input-group">
+            <input type="text" id="url" placeholder="Pega aquí la URL del video">
+            <button onclick="obtenerInfo()" id="info-button">Obtener Info</button>
+        </div>
+
+        <div id="error"></div>
+
+        <div id="video-info">
+            <h2 id="video-title"></h2>
+            <img id="thumbnail" src="" alt="Thumbnail">
+            
+            <div class="input-group">
+                <h3>Formato:</h3>
+                <select id="format" onchange="toggleQualitySelect()">
+                    <option value="mp4">MP4 (Video)</option>
+                    <option value="mp3">MP3 (Audio)</option>
+                </select>
+            </div>
+
+            <div id="quality-container" class="input-group">
+                <h3>Calidad:</h3>
+                <select id="quality"></select>
+            </div>
+
+            <button onclick="descargar()" id="download-button">Descargar</button>
+        </div>
+
+        <div id="progress-container" class="progress-container">
+            <h3>Progreso de descarga</h3>
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+            <p id="progress-text">0%</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
