@@ -1,80 +1,130 @@
-async function obtenerInfo() {
-    const url = document.getElementById('url').value;
-    const errorDiv = document.getElementById('error');
-    const videoInfo = document.getElementById('video-info');
-    const infoButton = document.getElementById('info-button');
+class YouTubeDownloader {
+    constructor() {
+        this.elements = {
+            url: document.getElementById('url'),
+            error: document.getElementById('error'),
+            videoInfo: document.getElementById('video-info'),
+            infoButton: document.getElementById('info-button'),
+            videoTitle: document.getElementById('video-title'),
+            thumbnail: document.getElementById('thumbnail'),
+            quality: document.getElementById('quality'),
+            format: document.getElementById('format'),
+            downloadButton: document.getElementById('download-button'),
+            progressContainer: document.getElementById('progress-container'),
+            progressBar: document.getElementById('progress'),
+            progressText: document.getElementById('progress-text')
+        };
 
-    if (!url) {
-        errorDiv.textContent = 'Por favor ingresa una URL';
-        return;
+        this.initializeEventListeners();
     }
 
-    infoButton.disabled = true;
+    initializeEventListeners() {
+        this.elements.infoButton.addEventListener('click', () => this.obtenerInfo());
+        this.elements.format.addEventListener('change', () => this.toggleQualitySelect());
+        this.elements.downloadButton.addEventListener('click', () => this.descargar());
+    }
 
-    try {
-        const response = await fetch(`/info?url=${encodeURIComponent(url)}`);
-        const data = await response.json();
+    async obtenerInfo() {
+        if (!this.validateUrl()) return;
 
-        if (response.ok) {
-            document.getElementById('video-title').textContent = data.title;
-            document.getElementById('thumbnail').src = data.thumbnail;
-            
-            const qualitySelect = document.getElementById('quality');
-            qualitySelect.innerHTML = '';
-            
-            data.qualities.forEach(quality => {
-                const option = document.createElement('option');
-                option.value = quality.itag;
-                option.textContent = quality.qualityLabel;
-                qualitySelect.appendChild(option);
-            });
+        this.elements.infoButton.disabled = true;
 
-            videoInfo.style.display = 'block';
-            errorDiv.textContent = '';
-        } else {
-            throw new Error(data.error);
+        try {
+            const data = await this.fetchVideoInfo();
+            this.updateVideoInterface(data);
+        } catch (error) {
+            this.showError('Error al obtener información del video');
+        } finally {
+            this.elements.infoButton.disabled = false;
         }
-    } catch (error) {
-        errorDiv.textContent = 'Error al obtener información del video';
-        videoInfo.style.display = 'none';
-    } finally {
-        infoButton.disabled = false;
+    }
+
+    validateUrl() {
+        const url = this.elements.url.value;
+        if (!url) {
+            this.showError('Por favor ingresa una URL');
+            return false;
+        }
+        return true;
+    }
+
+    async fetchVideoInfo() {
+        const response = await fetch(`/info?url=${encodeURIComponent(this.elements.url.value)}`);
+        const data = await response.json();
+        
+        if (!response.ok) throw new Error(data.error);
+        return data;
+    }
+
+    updateVideoInterface(data) {
+        this.elements.videoTitle.textContent = data.title;
+        this.elements.thumbnail.src = data.thumbnail;
+        this.updateQualityOptions(data.qualities);
+        this.elements.videoInfo.style.display = 'block';
+        this.elements.error.textContent = '';
+    }
+
+    updateQualityOptions(qualities) {
+        this.elements.quality.innerHTML = qualities
+            .map(quality => `
+                <option value="${quality.itag}">
+                    ${quality.qualityLabel}
+                </option>
+            `)
+            .join('');
+    }
+
+    toggleQualitySelect() {
+        const isVideo = this.elements.format.value === 'mp4';
+        this.elements.quality.parentElement.style.display = isVideo ? 'block' : 'none';
+    }
+
+    descargar() {
+        this.elements.downloadButton.disabled = true;
+        this.showProgressUI();
+
+        const downloadUrl = this.createDownloadUrl();
+        this.initiateDownload(downloadUrl);
+    }
+
+    createDownloadUrl() {
+        const params = new URLSearchParams({
+            url: this.elements.url.value,
+            format: this.elements.format.value,
+            quality: this.elements.quality.value
+        });
+        return `/download?${params.toString()}`;
+    }
+
+    initiateDownload(url) {
+        const link = document.createElement('a');
+        link.href = url;
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        this.finalizeDownload();
+    }
+
+    showProgressUI() {
+        this.elements.progressContainer.style.display = 'block';
+        this.elements.progressBar.style.width = '0%';
+        this.elements.progressText.textContent = 'Iniciando descarga...';
+    }
+
+    finalizeDownload() {
+        this.elements.progressText.textContent = 'Descarga iniciada. Revisa tu carpeta de descargas.';
+        this.elements.downloadButton.disabled = false;
+    }
+
+    showError(message) {
+        this.elements.error.textContent = message;
+        this.elements.videoInfo.style.display = 'none';
     }
 }
 
-function toggleQualitySelect() {
-    const format = document.getElementById('format').value;
-    const qualityContainer = document.getElementById('quality-container');
-    qualityContainer.style.display = format === 'mp4' ? 'block' : 'none';
-}
-
-function descargar() {
-    const url = document.getElementById('url').value;
-    const format = document.getElementById('format').value;
-    const quality = document.getElementById('quality').value;
-    const downloadButton = document.getElementById('download-button');
-    const progressContainer = document.getElementById('progress-container');
-    const progressBar = document.getElementById('progress');
-    const progressText = document.getElementById('progress-text');
-
-    downloadButton.disabled = true;
-    progressContainer.style.display = 'block';
-    progressBar.style.width = '0%';
-    progressText.textContent = 'Iniciando descarga...';
-
-    // Crear un elemento <a> invisible para la descarga
-    const link = document.createElement('a');
-    link.href = `/download?url=${encodeURIComponent(url)}&format=${format}&quality=${quality}`;
-    link.style.display = 'none';
-    document.body.appendChild(link);
-    
-    // Iniciar la descarga
-    link.click();
-    
-    // Limpiar
-    document.body.removeChild(link);
-    
-    // Mostrar mensaje
-    progressText.textContent = 'Descarga iniciada. Revisa tu carpeta de descargas.';
-    downloadButton.disabled = false;
-} 
+// Inicializar la aplicación
+document.addEventListener('DOMContentLoaded', () => {
+    window.downloader = new YouTubeDownloader();
+}); 

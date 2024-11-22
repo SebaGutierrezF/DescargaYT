@@ -1,80 +1,110 @@
 const express = require('express');
 const ytdl = require('ytdl-core');
 const cors = require('cors');
-const app = express();
 const { PassThrough } = require('stream');
 
-app.use(cors());
-app.use(express.json());
-app.use(express.static('public'));
-
-app.use((req, res, next) => {
-    res.setHeader('Permissions-Policy', 'geolocation=(self), microphone=()');
-    next();
-});
-
-// Ruta para obtener información del video
-app.get('/info', async (req, res) => {
-    try {
-        const { url } = req.query;
-        const info = await ytdl.getInfo(url);
-        
-        const qualities = info.formats
-            .filter(format => format.hasVideo && format.hasAudio)
-            .map(format => ({
-                itag: format.itag,
-                qualityLabel: format.qualityLabel,
-                container: format.container
-            }));
-
-        res.json({
-            title: info.videoDetails.title,
-            thumbnail: info.videoDetails.thumbnails[0].url,
-            qualities: qualities
-        });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
+class VideoDownloader {
+    constructor() {
+        this.app = express();
+        this.setupMiddleware();
+        this.setupRoutes();
     }
-});
 
-// Ruta de descarga
-app.get('/download', async (req, res) => {
-    try {
-        const { url, quality, format } = req.query;
-        const info = await ytdl.getInfo(url);
-        const videoTitle = info.videoDetails.title.replace(/[^\w\s]/gi, '');
+    setupMiddleware() {
+        this.app.use(cors());
+        this.app.use(express.json());
+        this.app.use(express.static('public'));
+    }
 
-        const passThrough = new PassThrough();
-        const stream = ytdl(url, {
+    setupRoutes() {
+        this.app.get('/info', this.getVideoInfo);
+        this.app.get('/download', this.downloadVideo);
+    }
+
+    async getVideoInfo(req, res) {
+        try {
+            const { url } = req.query;
+            const info = await ytdl.getInfo(url);
+            
+            const qualities = info.formats
+                .filter(format => format.hasVideo && format.hasAudio)
+                .map(({ itag, qualityLabel, container }) => ({
+                    itag,
+                    qualityLabel,
+                    container
+                }));
+
+            res.json({
+                title: info.videoDetails.title,
+                thumbnail: info.videoDetails.thumbnails[0].url,
+                qualities
+            });
+        } catch (error) {
+            console.error('Error al obtener información:', error);
+            res.status(500).json({ error: 'Error al obtener información del video' });
+        }
+    }
+
+    async downloadVideo(req, res) {
+        try {
+            const { url, quality, format } = req.query;
+            const info = await ytdl.getInfo(url);
+            const videoTitle = this.sanitizeFileName(info.videoDetails.title);
+
+            const stream = this.createDownloadStream(url, quality, format);
+            await this.handleVideoStream(stream, res, videoTitle, format);
+
+        } catch (error) {
+            console.error('Error en descarga:', error);
+            res.status(500).json({ error: 'Error al descargar el video' });
+        }
+    }
+
+    sanitizeFileName(fileName) {
+        return fileName.replace(/[^\w\s]/gi, '');
+    }
+
+    createDownloadStream(url, quality, format) {
+        return ytdl(url, {
             quality: quality || 'highest',
             filter: format === 'mp3' ? 'audioonly' : 'audioandvideo'
         });
+    }
 
+    async handleVideoStream(stream, res, videoTitle, format) {
+        const passThrough = new PassThrough();
         stream.pipe(passThrough);
 
-        let data = [];
-        passThrough.on('data', chunk => {
-            data.push(chunk);
-        });
+        const chunks = [];
+        
+        return new Promise((resolve, reject) => {
+            passThrough.on('data', chunk => chunks.push(chunk));
+            
+            passThrough.on('end', () => {
+                const buffer = Buffer.concat(chunks);
+                this.setResponseHeaders(res, videoTitle, format);
+                res.send(buffer);
+                resolve();
+            });
 
-        passThrough.on('end', () => {
-            const buffer = Buffer.concat(data);
-            res.header('Content-Disposition', `attachment; filename="${videoTitle}.${format}"`);
-            res.header('Content-Type', format === 'mp3' ? 'audio/mpeg' : 'video/mp4');
-            res.send(buffer);
+            passThrough.on('error', error => {
+                console.error('Error en el stream:', error);
+                reject(error);
+            });
         });
-
-        passThrough.on('error', error => {
-            console.error('Error en descarga:', error);
-            res.status(500).json({ error: error.message });
-        });
-
-    } catch (error) {
-        console.error('Error en descarga:', error);
-        res.status(500).json({ error: error.message });
     }
-});
 
-app.listen(3000, () => {
-    console.log('Servidor corriendo en http://localhost:3000');
-}); 
+    setResponseHeaders(res, videoTitle, format) {
+        res.header('Content-Disposition', `attachment; filename="${videoTitle}.${format}"`);
+        res.header('Content-Type', format === 'mp3' ? 'audio/mpeg' : 'video/mp4');
+    }
+
+    start(port = 3000) {
+        this.app.listen(port, () => {
+            console.log(`Servidor corriendo en http://localhost:${port}`);
+        });
+    }
+}
+
+const downloader = new VideoDownloader();
+downloader.start(); 
