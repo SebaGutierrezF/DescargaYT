@@ -1,8 +1,11 @@
 name = "youtube-downloader"
 main = "src/worker.js"
-account_id = "muddy-fire-bf36"
-workers_dev = true
 compatibility_date = "2024-01-01"
+account_id = "fccc15afa453ea68debf4a976cb3627e"
 
 [vars]
 ALLOWED_ORIGINS = "https://sebagutierrezf.github.io"
+
+[[rules]]
+type = "ESModule"
+globs = ["**/*.js"]
