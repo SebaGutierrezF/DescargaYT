@@ -7,4 +7,11 @@ compatibility_date = "2023-01-01"
 [build]
 command = "npm install"
 [build.upload]
-format = "service-worker" 
+format = "service-worker"
+
+[vars]
+ALLOWED_ORIGINS = "*"
+
+[[rules]]
+type = "ESModule"
+globs = ["**/*.js"] 

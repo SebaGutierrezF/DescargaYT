@@ -54,7 +54,6 @@ class YouTubeDownloader {
             const response = await fetch(`${this.API_URL}/info?url=${encodeURIComponent(this.elements.url.value)}`, {
                 method: 'GET',
                 mode: 'cors',
-                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json'
                 }
