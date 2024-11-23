@@ -25,4 +25,37 @@ El proyecto está dividido en dos partes:
      CORS_ORIGIN=https://sebagutierrezf.github.io
      ```
 
-[... resto del README igual ...]
+## Despliegue
+
+### Backend
+El backend se despliega automáticamente en GitHub Container Registry cuando se hace push a main.
+
+Para ejecutar el contenedor localmente:
+
+```bash
+# Descargar la imagen
+docker pull ghcr.io/sebagutierrezf/descargayt:latest
+
+# Ejecutar el contenedor
+docker run -p 3000:3000 ghcr.io/sebagutierrezf/descargayt:latest
+```
+
+### Frontend
+El frontend se despliega automáticamente en GitHub Pages.
+
+## Seguridad
+El proyecto implementa las siguientes medidas de seguridad:
+
+- CORS configurado para orígenes específicos
+- Headers de seguridad para prevenir ataques XSS
+- Manejo seguro de descargas
+- Validación de URLs
+- Sanitización de nombres de archivo
+
+## Variables de Entorno
+El backend requiere las siguientes variables:
+
+```bash
+NODE_ENV=production
+CORS_ORIGIN=https://sebagutierrezf.github.io
+```

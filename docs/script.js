@@ -1,6 +1,6 @@
 class YouTubeDownloader {
     constructor() {
-        this.API_URL = 'http://localhost:3000';
+        this.API_URL = 'https://youtube-downloader-backend.sebagutierrezf.com';
         this.elements = {
             url: document.getElementById('url'),
             error: document.getElementById('error'),
@@ -50,11 +50,26 @@ class YouTubeDownloader {
     }
 
     async fetchVideoInfo() {
-        const response = await fetch(`${this.API_URL}/info?url=${encodeURIComponent(this.elements.url.value)}`);
-        const data = await response.json();
-        
-        if (!response.ok) throw new Error(data.error);
-        return data;
+        try {
+            const response = await fetch(`${this.API_URL}/info?url=${encodeURIComponent(this.elements.url.value)}`, {
+                method: 'GET',
+                mode: 'cors',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error fetching video info:', error);
+            throw error;
+        }
     }
 
     updateVideoInterface(data) {
@@ -98,14 +113,20 @@ class YouTubeDownloader {
     }
 
     initiateDownload(url) {
-        const link = document.createElement('a');
-        link.href = url;
-        link.style.display = 'none';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        this.finalizeDownload();
+        try {
+            const link = document.createElement('a');
+            link.href = url;
+            link.rel = 'noopener noreferrer';
+            link.target = '_blank';
+            link.download = '';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            this.finalizeDownload();
+        } catch (error) {
+            console.error('Error initiating download:', error);
+            this.showError('Error al iniciar la descarga');
+        }
     }
 
     showProgressUI() {

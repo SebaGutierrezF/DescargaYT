@@ -15,8 +15,18 @@ class VideoDownloader {
         this.app.use(cors({
             origin: ['https://sebagutierrezf.github.io', 'http://localhost:3000'],
             methods: ['GET', 'POST'],
-            credentials: true
+            credentials: true,
+            allowedHeaders: ['Content-Type', 'Authorization']
         }));
+        
+        // Añadir headers de seguridad
+        this.app.use((req, res, next) => {
+            res.header('Cross-Origin-Resource-Policy', 'cross-origin');
+            res.header('Cross-Origin-Embedder-Policy', 'require-corp');
+            res.header('Cross-Origin-Opener-Policy', 'same-origin');
+            next();
+        });
+
         this.app.use(express.json());
         this.app.use(express.static('docs'));
     }
