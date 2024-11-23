@@ -6,13 +6,23 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler publish",
-    "test": "jest"
+    "test": "jest",
+    "clean": "rm -rf node_modules package-lock.json",
+    "prepare": "npm install"
   },
   "dependencies": {
     "ytdl-core": "^4.11.5"
   },
   "devDependencies": {
     "jest": "^29.7.0",
-    "wrangler": "^3.0.0"
+    "wrangler": "3.90.0",
+    "@cloudflare/workers-types": "4.20231121.0",
+    "typescript": "5.0.4"
+  },
+  "engines": {
+    "node": ">=16.13.0"
+  },
+  "overrides": {
+    "wrangler": "3.90.0"
   }
 }
