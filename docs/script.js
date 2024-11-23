@@ -1,6 +1,6 @@
 class YouTubeDownloader {
     constructor() {
-        this.API_URL = 'https://tu-backend-url.herokuapp.com';
+        this.API_URL = 'http://localhost:3000';
         this.elements = {
             url: document.getElementById('url'),
             error: document.getElementById('error'),
@@ -125,7 +125,8 @@ class YouTubeDownloader {
     }
 }
 
-// Inicializar la aplicación
+// Inicializar la aplicación y hacerla globalmente accesible
+let downloader;
 document.addEventListener('DOMContentLoaded', () => {
-    window.downloader = new YouTubeDownloader();
+    downloader = new YouTubeDownloader();
 }); 

@@ -10,7 +10,7 @@
         
         <div class="input-group">
             <input type="text" id="url" placeholder="Pega aquí la URL del video">
-            <button onclick="obtenerInfo()" id="info-button">Obtener Info</button>
+            <button id="info-button">Obtener Info</button>
         </div>
 
         <div id="error"></div>
@@ -21,7 +21,7 @@
             
             <div class="input-group">
                 <h3>Formato:</h3>
-                <select id="format" onchange="toggleQualitySelect()">
+                <select id="format">
                     <option value="mp4">MP4 (Video)</option>
                     <option value="mp3">MP3 (Audio)</option>
                 </select>
@@ -32,7 +32,7 @@
                 <select id="quality"></select>
             </div>
 
-            <button onclick="descargar()" id="download-button">Descargar</button>
+            <button id="download-button">Descargar</button>
         </div>
 
         <div id="progress-container" class="progress-container">
