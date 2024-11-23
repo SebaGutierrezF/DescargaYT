@@ -1,37 +1,37 @@
 # DescargaYT
 
-## Demo en vivo
-La aplicación está disponible en: https://sebagutierrezf.github.io/DescargaYT/
-
 ## Estructura
-El proyecto está desplegado completamente en GitHub Pages:
-- Frontend: `/docs`
-- Backend: `/backend`
+El proyecto está dividido en:
+- Frontend: Alojado en GitHub Pages (`/docs`)
+- Backend: Cloudflare Worker (`worker.js`)
 
 ## Desarrollo Local
 
-1. Clonar el repositorio:
+1. Instalar Wrangler (CLI de Cloudflare Workers):
 ```bash
-git clone https://github.com/sebagutierrezf/DescargaYT.git
-cd DescargaYT
+npm install -g wrangler
 ```
 
-2. Instalar dependencias:
+2. Autenticarse:
 ```bash
-npm install
+wrangler login
 ```
 
-3. Iniciar el servidor en modo desarrollo:
+3. Desarrollar localmente:
 ```bash
-npm run dev
+wrangler dev
 ```
-
-4. Abrir http://localhost:3000 en el navegador
 
 ## Despliegue
-El proyecto se despliega automáticamente en GitHub Pages cuando se hace push a main.
-- Frontend: Los archivos en `/docs` se despliegan en la raíz
-- Backend: Los archivos del servidor se despliegan en `/backend`
+
+1. Frontend (automático con GitHub Actions)
+2. Backend:
+```bash
+wrangler publish
+```
+
+## Demo en vivo
+La aplicación está disponible en: https://sebagutierrezf.github.io/DescargaYT/
 
 ## Configuración
 
