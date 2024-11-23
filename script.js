@@ -33,7 +33,7 @@ class YouTubeDownloader {
 
         this.elements.infoButton.disabled = true;
         this.clearPreviousData();
-        this.showLoading();
+        this.showLoading('Obteniendo información del video...');
 
         try {
             const timestamp = new Date().getTime();
@@ -41,25 +41,21 @@ class YouTubeDownloader {
             
             console.log('Fetching from:', url);
             
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                }
-            });
-            
+            const response = await fetch(url);
             const data = await response.json();
             
             if (!response.ok) {
-                throw new Error(data.error || `HTTP error! status: ${response.status}`);
+                throw new Error(data.error || 'Error al obtener información del video');
             }
             
-            console.log('Response data:', data);
+            if (!data.qualities || data.qualities.length === 0) {
+                throw new Error('No se encontraron formatos disponibles para este video');
+            }
+
             this.updateVideoInterface(data);
         } catch (error) {
-            console.error('Error fetching video info:', error);
-            this.showError(`Error: ${error.message}`);
+            console.error('Error:', error);
+            this.showError(error.message);
         } finally {
             this.elements.infoButton.disabled = false;
             this.hideLoading();
@@ -147,6 +143,7 @@ class YouTubeDownloader {
 
     showError(message) {
         this.elements.error.textContent = message;
+        this.elements.error.style.display = 'block';
         this.elements.videoInfo.style.display = 'none';
     }
 
@@ -170,9 +167,10 @@ class YouTubeDownloader {
         }
     }
 
-    showLoading() {
+    showLoading(message) {
         const loadingEl = document.getElementById('loading') || this.createLoadingElement();
         loadingEl.style.display = 'block';
+        loadingEl.textContent = message;
     }
 
     hideLoading() {
