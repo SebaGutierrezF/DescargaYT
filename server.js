@@ -60,23 +60,28 @@ app.get('/info', async (req, res) => {
     }
 
     const videoId = ytdl.getVideoID(url);
-    const videoInfo = await ytdl.getInfo(url);
+    const videoInfo = await ytdl.getInfo(url, {
+      requestOptions: {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.5'
+        }
+      }
+    });
     
     const response = {
       title: videoInfo.videoDetails.title,
       thumbnail: videoInfo.videoDetails.thumbnails[0].url,
-      qualities: videoInfo.formats.map(format => ({
-        itag: format.itag,
-        qualityLabel: format.qualityLabel || 'Audio only'
-      }))
+      qualities: videoInfo.formats
+        .filter(format => format.hasVideo || format.hasAudio)
+        .map(format => ({
+          itag: format.itag,
+          qualityLabel: format.qualityLabel || 'Audio only',
+          hasVideo: format.hasVideo,
+          hasAudio: format.hasAudio
+        }))
     };
-    
-    // Agregar headers anti-caché específicos para esta respuesta
-    res.set({
-      'Cache-Control': 'no-store, no-cache, must-revalidate, private',
-      'Expires': '-1',
-      'Pragma': 'no-cache'
-    });
     
     res.json(response);
   } catch (error) {
@@ -91,11 +96,16 @@ app.get('/download', async (req, res) => {
     const { url, format, quality } = req.query;
     const options = {
       quality: quality || 'highest',
-      filter: format === 'mp3' ? 'audioonly' : 'videoandaudio'
+      filter: format === 'mp3' ? 'audioonly' : 'videoandaudio',
+      requestOptions: {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
+        }
+      }
     };
 
     const videoStream = ytdl(url, options);
-    const videoInfo = await ytdl.getInfo(url);
+    const videoInfo = await ytdl.getInfo(url, options);
     
     res.header('Content-Disposition', `attachment; filename="${videoInfo.videoDetails.title}.${format}"`);
     videoStream.pipe(res);
