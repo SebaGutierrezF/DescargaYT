@@ -1,17 +1,8 @@
 name = "youtube-downloader"
-type = "javascript"
+main = "src/worker.js"
 account_id = "muddy-fire-bf36"
 workers_dev = true
-compatibility_date = "2023-01-01"
-
-[build]
-command = "npm install"
-[build.upload]
-format = "service-worker"
+compatibility_date = "2024-01-01"
 
 [vars]
 ALLOWED_ORIGINS = "https://sebagutierrezf.github.io"
-
-[[rules]]
-type = "ESModule"
-globs = ["**/*.js"] 
