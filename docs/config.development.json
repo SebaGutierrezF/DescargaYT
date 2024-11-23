@@ -1,0 +1,5 @@
+{
+  "API_URL": "http://localhost:3000",
+  "allowedFormats": ["mp4", "mp3"],
+  "maxFileSize": "2GB"
+} 

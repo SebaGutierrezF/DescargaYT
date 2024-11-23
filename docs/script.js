@@ -1,8 +1,12 @@
 class YouTubeDownloader {
-    constructor() {
-        this.API_URL = 'https://youtube-downloader.workers.dev';
-        this.DOWNLOAD_SERVER = 'https://descargayt.onrender.com';
-        this.elements = {
+    constructor(config) {
+        this.config = config;
+        this.elements = this.initializeElements();
+        this.initializeEventListeners();
+    }
+
+    initializeElements() {
+        return {
             url: document.getElementById('url'),
             error: document.getElementById('error'),
             videoInfo: document.getElementById('video-info'),
@@ -16,8 +20,6 @@ class YouTubeDownloader {
             progressBar: document.getElementById('progress'),
             progressText: document.getElementById('progress-text')
         };
-
-        this.initializeEventListeners();
     }
 
     initializeEventListeners() {
@@ -52,9 +54,8 @@ class YouTubeDownloader {
 
     async fetchVideoInfo() {
         try {
-            const response = await fetch(`${this.API_URL}/info?url=${encodeURIComponent(this.elements.url.value)}`, {
+            const response = await fetch(`${this.config.API_URL}/info?url=${encodeURIComponent(this.elements.url.value)}`, {
                 method: 'GET',
-                mode: 'cors',
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -64,8 +65,7 @@ class YouTubeDownloader {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             
-            const data = await response.json();
-            return data;
+            return await response.json();
         } catch (error) {
             console.error('Error fetching video info:', error);
             throw error;
@@ -109,7 +109,7 @@ class YouTubeDownloader {
             format: this.elements.format.value,
             quality: this.elements.quality.value
         });
-        return `${this.API_URL}/download?${params.toString()}`;
+        return `${this.config.API_URL}/download?${params.toString()}`;
     }
 
     initiateDownload(url) {
@@ -133,8 +133,21 @@ class YouTubeDownloader {
     }
 }
 
-// Inicializar la aplicación y hacerla globalmente accesible
-let downloader;
-document.addEventListener('DOMContentLoaded', () => {
-    downloader = new YouTubeDownloader();
-}); 
+// Configuración directa
+const developmentConfig = {
+    "API_URL": "http://localhost:3000",
+    "allowedFormats": ["mp4", "mp3"],
+    "maxFileSize": "2GB"
+};
+
+const productionConfig = {
+    "API_URL": "https://youtube-downloader.onrender.com",
+    "allowedFormats": ["mp4", "mp3"],
+    "maxFileSize": "2GB"
+};
+
+// Inicialización
+const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const config = isDevelopment ? developmentConfig : productionConfig;
+
+window.downloader = new YouTubeDownloader(config); 

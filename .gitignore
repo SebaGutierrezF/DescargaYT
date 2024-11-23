@@ -1,17 +1,14 @@
 # Dependencies
 node_modules/
-.wrangler/
 
 # Environment y Secretos
 .env
-.dev.vars
+.env.development
 *.local.json
 config.local.json
-wrangler.toml
 
 # Build
 dist/
-worker/
 
 # Logs
 *.log
@@ -20,8 +17,3 @@ npm-debug.log*
 # System
 .DS_Store
 Thumbs.db
-
-# Cloudflare
-.wrangler/
-.env
-.dev.vars

@@ -6,12 +6,12 @@
   },
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js --watch src"
   },
   "dependencies": {
     "express": "^4.17.1",
     "cors": "^2.8.5",
-    "youtube-dl-exec": "^2.4.6",
+    "ytdl-core": "^4.11.5",
     "dotenv": "^16.0.0"
   },
   "devDependencies": {
