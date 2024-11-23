@@ -17,12 +17,12 @@ cp .env.example .env
 
 1. Instalar dependencias:
 ```bash
-npm install
+yarn install
 ```
 
 2. Iniciar desarrollo:
 ```bash
-npm run dev
+yarn dev
 ```
 
 ## Despliegue

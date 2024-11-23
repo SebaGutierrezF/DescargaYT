@@ -1,9 +1,11 @@
 services:
   - type: web
-    name: youtube-dl-server
+    name: youtube-downloader
     env: node
     buildCommand: npm install
-    startCommand: node server.js
+    startCommand: npm start
     envVars:
-      - key: PORT
-        value: 3000 
+      - key: FRONTEND_URL
+        value: https://sebagutierrezf.github.io
+      - key: YOUTUBE_API_KEY
+        sync: false 

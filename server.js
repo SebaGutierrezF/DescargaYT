@@ -5,12 +5,16 @@ const ytdl = require('ytdl-core');
 
 const app = express();
 
-// Simplificar CORS para desarrollo
-app.use(cors({
-  origin: '*',  // Permite todas las origenes en desarrollo
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type'],
-}));
+// Simplificar CORS - permitir todos los orígenes en desarrollo
+app.use(cors());
+
+// Middleware para asegurar headers CORS en todas las respuestas
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Accept');
+  next();
+});
 
 class YouTubeAPI {
   constructor(apiKey) {
@@ -46,7 +50,7 @@ app.get('/info', async (req, res) => {
         qualityLabel: format.qualityLabel || 'Audio only'
       }))
     };
-
+    
     res.json(response);
   } catch (error) {
     console.error('Error in /info:', error);

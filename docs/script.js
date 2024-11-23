@@ -33,10 +33,29 @@ class YouTubeDownloader {
 
         this.elements.infoButton.disabled = true;
 
+        this.clearPreviousData();
+
         try {
-            const data = await this.fetchVideoInfo();
+            const timestamp = new Date().getTime();
+            const url = `${this.config.API_URL}/info?url=${encodeURIComponent(this.elements.url.value)}&_t=${timestamp}`;
+            
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache'
+                },
+                cache: 'no-store'
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
             this.updateVideoInterface(data);
         } catch (error) {
+            console.error('Error fetching video info:', error);
             this.showError('Error al obtener información del video');
         } finally {
             this.elements.infoButton.disabled = false;
@@ -54,14 +73,7 @@ class YouTubeDownloader {
 
     async fetchVideoInfo() {
         try {
-            const response = await fetch(`${this.config.API_URL}/info?url=${encodeURIComponent(this.elements.url.value)}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                credentials: 'same-origin'
-            });
+            const response = await fetch(`${this.config.API_URL}/info?url=${encodeURIComponent(this.elements.url.value)}`);
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -132,6 +144,26 @@ class YouTubeDownloader {
     showError(message) {
         this.elements.error.textContent = message;
         this.elements.videoInfo.style.display = 'none';
+    }
+
+    clearPreviousData() {
+        this.elements.videoTitle.textContent = '';
+        this.elements.thumbnail.src = '';
+        this.elements.quality.innerHTML = '';
+        this.elements.error.textContent = '';
+        this.elements.videoInfo.style.display = 'none';
+        this.elements.progressContainer.style.display = 'none';
+        this.elements.progressBar.style.width = '0%';
+        this.elements.progressText.textContent = '';
+        
+        this.elements.format.selectedIndex = 0;
+        this.elements.quality.selectedIndex = 0;
+        
+        if (this.elements.thumbnail.src) {
+            const oldSrc = this.elements.thumbnail.src;
+            this.elements.thumbnail.src = '';
+            URL.revokeObjectURL(oldSrc);
+        }
     }
 }
 
