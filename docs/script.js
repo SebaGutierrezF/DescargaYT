@@ -33,34 +33,36 @@ class YouTubeDownloader {
 
         this.elements.infoButton.disabled = true;
         this.clearPreviousData();
+        this.showLoading();
 
         try {
             const timestamp = new Date().getTime();
             const url = `${this.config.API_URL}/info?url=${encodeURIComponent(this.elements.url.value)}&_t=${timestamp}`;
             
-            console.log('Fetching from:', url); // Para debugging
+            console.log('Fetching from:', url);
             
             const response = await fetch(url, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'Origin': window.location.origin
-                },
-                mode: 'cors'
+                    'Accept': 'application/json'
+                }
             });
             
+            const data = await response.json();
+            
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                throw new Error(data.error || `HTTP error! status: ${response.status}`);
             }
             
-            const data = await response.json();
+            console.log('Response data:', data);
             this.updateVideoInterface(data);
         } catch (error) {
             console.error('Error fetching video info:', error);
-            this.showError('Error al obtener información del video');
+            this.showError(`Error: ${error.message}`);
         } finally {
             this.elements.infoButton.disabled = false;
+            this.hideLoading();
         }
     }
 
@@ -166,6 +168,25 @@ class YouTubeDownloader {
             this.elements.thumbnail.src = '';
             URL.revokeObjectURL(oldSrc);
         }
+    }
+
+    showLoading() {
+        const loadingEl = document.getElementById('loading') || this.createLoadingElement();
+        loadingEl.style.display = 'block';
+    }
+
+    hideLoading() {
+        const loadingEl = document.getElementById('loading');
+        if (loadingEl) loadingEl.style.display = 'none';
+    }
+
+    createLoadingElement() {
+        const loadingEl = document.createElement('div');
+        loadingEl.id = 'loading';
+        loadingEl.textContent = 'Cargando...';
+        loadingEl.style.cssText = 'text-align: center; margin: 10px 0;';
+        this.elements.error.parentNode.insertBefore(loadingEl, this.elements.error);
+        return loadingEl;
     }
 }
 
