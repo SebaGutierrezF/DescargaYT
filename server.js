@@ -1,23 +1,30 @@
 const express = require('express');
 const cors = require('cors');
 const youtubedl = require('youtube-dl-exec');
-const os = require('os');
 const path = require('path');
+const fs = require('fs').promises;
 
 const app = express();
 app.use(cors());
 
-// Determinar la ruta del navegador según el sistema operativo
-const getBrowserPath = () => {
-  switch (os.platform()) {
-    case 'win32':
-      return path.join(os.homedir(), 'AppData/Local/Google/Chrome');
-    case 'darwin':
-      return path.join(os.homedir(), 'Library/Application Support/Google/Chrome');
-    default:
-      return path.join(os.homedir(), '.config/google-chrome');
+// Crear archivo de cookies
+const COOKIES_CONTENT = `# Netscape HTTP Cookie File
+.youtube.com	TRUE	/	TRUE	2597573456	VISITOR_INFO1_LIVE	iM7JxrxvQCE
+.youtube.com	TRUE	/	TRUE	2597573456	CONSENT	YES+
+.youtube.com	TRUE	/	TRUE	2597573456	GPS	1
+.youtube.com	TRUE	/	TRUE	2597573456	YSC	w2HOvq_5p1A`;
+
+const COOKIES_PATH = path.join(__dirname, 'cookies.txt');
+
+// Función para inicializar las cookies
+async function initCookies() {
+  try {
+    await fs.writeFile(COOKIES_PATH, COOKIES_CONTENT);
+    console.log('Cookies file created successfully');
+  } catch (error) {
+    console.error('Error creating cookies file:', error);
   }
-};
+}
 
 app.get('/info', async (req, res) => {
   try {
@@ -27,6 +34,9 @@ app.get('/info', async (req, res) => {
       return res.status(400).json({ error: 'URL is required' });
     }
 
+    // Asegurarse de que el archivo de cookies existe
+    await initCookies();
+
     const options = {
       dumpSingleJson: true,
       noWarnings: true,
@@ -34,9 +44,12 @@ app.get('/info', async (req, res) => {
       noCheckCertificate: true,
       preferFreeFormats: true,
       youtubeSkipDashManifest: true,
-      cookiesFromBrowser: ['chrome'], // Usar cookies de Chrome
+      cookies: COOKIES_PATH,
       addHeader: [
-        'User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        'User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept:text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language:en-US,en;q=0.5',
+        'Connection:keep-alive'
       ]
     };
 
@@ -68,4 +81,7 @@ app.get('/info', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`)); 
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  initCookies(); // Inicializar cookies al arrancar
+}); 
