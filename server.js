@@ -3,11 +3,36 @@ const express = require('express');
 const cors = require('cors');
 const ytdl = require('ytdl-core');
 
-// Deshabilitar la verificación de actualizaciones
 process.env.YTDL_NO_UPDATE = 'true';
 
 const app = express();
 app.use(cors());
+
+const getVideoInfo = async (url) => {
+  const options = {
+    requestOptions: {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': '*/*',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Referer': 'https://www.youtube.com/',
+        'X-YouTube-Client-Name': '1',
+        'X-YouTube-Client-Version': '2.20231121.08.00',
+        'Cookie': process.env.YOUTUBE_COOKIE || ''
+      }
+    }
+  };
+
+  try {
+    return await ytdl.getInfo(url, options);
+  } catch (error) {
+    if (error.statusCode === 410) {
+      options.requestOptions.headers['User-Agent'] = 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.2 Mobile/15E148 Safari/604.1';
+      return await ytdl.getInfo(url, options);
+    }
+    throw error;
+  }
+};
 
 app.get('/info', async (req, res) => {
   try {
@@ -22,29 +47,11 @@ app.get('/info', async (req, res) => {
       return res.status(400).json({ error: 'Invalid YouTube URL' });
     }
 
-    const options = {
-      requestOptions: {
-        headers: {
-          // Actualizar User-Agent
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Accept': '*/*',
-          'Accept-Language': 'en-US,en;q=0.9',
-          'Referer': 'https://www.youtube.com/',
-          'X-YouTube-Client-Name': '1',
-          'X-YouTube-Client-Version': '2.20231121.08.00'
-        }
-      }
-    };
-
-    console.log('Getting video info with options:', JSON.stringify(options, null, 2));
-    
-    const videoInfo = await ytdl.getInfo(url, options);
+    const videoInfo = await getVideoInfo(url);
     console.log('Video info retrieved successfully');
 
     const formats = videoInfo.formats.filter(format => {
-      // Filtrar solo formatos que funcionan
       return (format.hasVideo || format.hasAudio) && 
-             format.contentLength && 
              !format.isHLS;
     });
 
@@ -69,10 +76,9 @@ app.get('/info', async (req, res) => {
       statusCode: error.statusCode
     });
 
-    // Manejar diferentes tipos de errores
     if (error.statusCode === 410) {
       return res.status(400).json({
-        error: 'Este video no está disponible para descarga debido a restricciones de YouTube.'
+        error: 'Este video no está disponible temporalmente. Por favor, intenta con otro video o más tarde.'
       });
     }
 
