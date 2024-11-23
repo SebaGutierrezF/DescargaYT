@@ -1,6 +1,6 @@
 class YouTubeDownloader {
     constructor() {
-        this.API_URL = 'https://youtube-downloader.muddy-fire-bf36.workers.dev';
+        this.API_URL = 'https://youtube-downloader.workers.dev';
         this.elements = {
             url: document.getElementById('url'),
             error: document.getElementById('error'),
