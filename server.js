@@ -5,16 +5,28 @@ const ytdl = require('ytdl-core');
 
 const app = express();
 
-// Simplificar CORS - permitir todos los orígenes en desarrollo
-app.use(cors());
+// Configuración de CORS
+const allowedOrigins = [
+    'http://localhost:5500',
+    'http://127.0.0.1:5500',
+    'https://sebagutierrezf.github.io'
+];
 
-// Middleware para asegurar headers CORS en todas las respuestas
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Accept');
-  next();
-});
+app.use(cors({
+    origin: function(origin, callback) {
+        // Permitir requests sin origin (como Postman)
+        if (!origin) return callback(null, true);
+        
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            console.log('Origin not allowed:', origin); // Para debugging
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Accept', 'Origin']
+}));
 
 // Middleware para prevenir caché
 app.use((req, res, next) => {

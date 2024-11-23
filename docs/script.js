@@ -32,20 +32,22 @@ class YouTubeDownloader {
         if (!this.validateUrl()) return;
 
         this.elements.infoButton.disabled = true;
-
         this.clearPreviousData();
 
         try {
             const timestamp = new Date().getTime();
             const url = `${this.config.API_URL}/info?url=${encodeURIComponent(this.elements.url.value)}&_t=${timestamp}`;
             
+            console.log('Fetching from:', url); // Para debugging
+            
             const response = await fetch(url, {
                 method: 'GET',
                 headers: {
-                    'Cache-Control': 'no-cache',
-                    'Pragma': 'no-cache'
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Origin': window.location.origin
                 },
-                cache: 'no-store'
+                mode: 'cors'
             });
             
             if (!response.ok) {
@@ -167,21 +169,24 @@ class YouTubeDownloader {
     }
 }
 
-// Configuración directa
-const developmentConfig = {
-    "API_URL": "http://localhost:3000",
-    "allowedFormats": ["mp4", "mp3"],
-    "maxFileSize": "2GB"
+// Configuración según el ambiente
+const configs = {
+    development: {
+        API_URL: "http://localhost:3000",
+        allowedFormats: ["mp4", "mp3"],
+        maxFileSize: "2GB"
+    },
+    production: {
+        API_URL: "https://descargayt.onrender.com",
+        allowedFormats: ["mp4", "mp3"],
+        maxFileSize: "2GB"
+    }
 };
 
-const productionConfig = {
-    "API_URL": "https://youtube-downloader.onrender.com",
-    "allowedFormats": ["mp4", "mp3"],
-    "maxFileSize": "2GB"
-};
+// Detectar ambiente
+const isProduction = window.location.hostname === 'sebagutierrezf.github.io';
+const config = isProduction ? configs.production : configs.development;
 
-// Inicialización
-const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-const config = isDevelopment ? developmentConfig : productionConfig;
+console.log('Using config:', config); // Para debugging
 
 window.downloader = new YouTubeDownloader(config); 

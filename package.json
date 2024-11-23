@@ -6,7 +6,9 @@
   },
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js --watch src"
+    "dev": "nodemon server.js --watch src",
+    "test": "echo \"No test specified\" && exit 0",
+    "frontend": "serve docs -p 5500"
   },
   "dependencies": {
     "express": "^4.17.1",
