@@ -1,9 +1,23 @@
 const express = require('express');
 const cors = require('cors');
 const youtubedl = require('youtube-dl-exec');
+const os = require('os');
+const path = require('path');
 
 const app = express();
 app.use(cors());
+
+// Determinar la ruta del navegador según el sistema operativo
+const getBrowserPath = () => {
+  switch (os.platform()) {
+    case 'win32':
+      return path.join(os.homedir(), 'AppData/Local/Google/Chrome');
+    case 'darwin':
+      return path.join(os.homedir(), 'Library/Application Support/Google/Chrome');
+    default:
+      return path.join(os.homedir(), '.config/google-chrome');
+  }
+};
 
 app.get('/info', async (req, res) => {
   try {
@@ -13,14 +27,21 @@ app.get('/info', async (req, res) => {
       return res.status(400).json({ error: 'URL is required' });
     }
 
-    const videoInfo = await youtubedl(url, {
+    const options = {
       dumpSingleJson: true,
       noWarnings: true,
       noCallHome: true,
       noCheckCertificate: true,
       preferFreeFormats: true,
-      youtubeSkipDashManifest: true
-    });
+      youtubeSkipDashManifest: true,
+      cookiesFromBrowser: ['chrome'], // Usar cookies de Chrome
+      addHeader: [
+        'User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      ]
+    };
+
+    console.log('Getting video info with options:', JSON.stringify(options, null, 2));
+    const videoInfo = await youtubedl(url, options);
 
     const response = {
       title: videoInfo.title,
