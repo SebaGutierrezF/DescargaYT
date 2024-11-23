@@ -57,8 +57,10 @@ class YouTubeDownloader {
             const response = await fetch(`${this.config.API_URL}/info?url=${encodeURIComponent(this.elements.url.value)}`, {
                 method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json'
-                }
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                credentials: 'same-origin'
             });
             
             if (!response.ok) {
