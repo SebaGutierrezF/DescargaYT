@@ -1,12 +1,11 @@
 {
   "name": "youtube-downloader",
   "version": "1.0.0",
-  "description": "Descargador de videos de YouTube",
-  "main": "worker.js",
+  "description": "Descargador de videos de YouTube usando Cloudflare Workers",
+  "private": true,
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler publish",
-    "test": "jest",
     "clean": "rm -rf node_modules package-lock.json",
     "prepare": "npm install"
   },
@@ -14,15 +13,10 @@
     "ytdl-core": "^4.11.5"
   },
   "devDependencies": {
-    "jest": "^29.7.0",
     "wrangler": "3.90.0",
-    "@cloudflare/workers-types": "4.20231121.0",
-    "typescript": "5.0.4"
+    "@cloudflare/workers-types": "4.20231121.0"
   },
   "engines": {
     "node": ">=16.13.0"
-  },
-  "overrides": {
-    "wrangler": "3.90.0"
   }
 }

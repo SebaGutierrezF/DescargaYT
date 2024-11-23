@@ -1,65 +1,40 @@
 # DescargaYT
 
+Descargador de videos de YouTube usando Cloudflare Workers y GitHub Pages.
+
 ## Estructura
-El proyecto está dividido en:
-- Frontend: Alojado en GitHub Pages (`/docs`)
-- Backend: Cloudflare Worker (`worker.js`)
+- `/docs`: Frontend (GitHub Pages)
+- `/src`: Backend (Cloudflare Worker)
 
 ## Desarrollo Local
 
-1. Instalar Wrangler (CLI de Cloudflare Workers):
+1. Instalar dependencias:
 ```bash
-npm install -g wrangler
+npm install
 ```
 
-2. Autenticarse:
+2. Configurar Cloudflare:
 ```bash
-wrangler login
+npx wrangler login
 ```
 
-3. Desarrollar localmente:
+3. Iniciar desarrollo:
 ```bash
-wrangler dev
+npm run dev
 ```
 
 ## Despliegue
 
-1. Frontend (automático con GitHub Actions)
-2. Backend:
-```bash
-wrangler publish
-```
+### Frontend
+Se despliega automáticamente a GitHub Pages al hacer push a main.
 
-## Demo en vivo
-La aplicación está disponible en: https://sebagutierrezf.github.io/DescargaYT/
-
-## Configuración
-
-1. Frontend (GitHub Pages):
-   - Los archivos estáticos están en la carpeta `/docs`
-   - Se despliega automáticamente con GitHub Actions
-
-2. Backend:
-   - Servidor Express con ytdl-core
-   - Necesita las siguientes variables de entorno:
-     ```
-     PORT=3000
-     CORS_ORIGIN=https://sebagutierrezf.github.io
-     ```
-
-## Seguridad
-El proyecto implementa las siguientes medidas de seguridad:
-
-- CORS configurado para orígenes específicos
-- Headers de seguridad para prevenir ataques XSS
-- Manejo seguro de descargas
-- Validación de URLs
-- Sanitización de nombres de archivo
+### Backend
+Se despliega automáticamente a Cloudflare Workers al hacer push a main.
 
 ## Variables de Entorno
-El backend requiere las siguientes variables:
+Crear en GitHub:
+- `CF_API_TOKEN`: Token de API de Cloudflare
+- `CF_ACCOUNT_ID`: ID de cuenta de Cloudflare
 
-```bash
-NODE_ENV=production
-CORS_ORIGIN=https://sebagutierrezf.github.io
-```
+## Licencia
+ISC
