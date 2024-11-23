@@ -16,6 +16,14 @@ app.use((req, res, next) => {
   next();
 });
 
+// Middleware para prevenir caché
+app.use((req, res, next) => {
+  res.header('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.header('Expires', '-1');
+  res.header('Pragma', 'no-cache');
+  next();
+});
+
 class YouTubeAPI {
   constructor(apiKey) {
     this.apiKey = apiKey;
@@ -50,6 +58,13 @@ app.get('/info', async (req, res) => {
         qualityLabel: format.qualityLabel || 'Audio only'
       }))
     };
+    
+    // Agregar headers anti-caché específicos para esta respuesta
+    res.set({
+      'Cache-Control': 'no-store, no-cache, must-revalidate, private',
+      'Expires': '-1',
+      'Pragma': 'no-cache'
+    });
     
     res.json(response);
   } catch (error) {
