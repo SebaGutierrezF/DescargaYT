@@ -12,7 +12,11 @@ class VideoDownloader {
     }
 
     setupMiddleware() {
-        this.app.use(cors());
+        this.app.use(cors({
+            origin: ['https://sebagutierrezf.github.io', 'http://localhost:3000'],
+            methods: ['GET', 'POST'],
+            credentials: true
+        }));
         this.app.use(express.json());
         this.app.use(express.static('docs'));
     }

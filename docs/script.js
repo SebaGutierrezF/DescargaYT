@@ -1,5 +1,6 @@
 class YouTubeDownloader {
     constructor() {
+        this.API_URL = 'https://tu-backend-url.herokuapp.com';
         this.elements = {
             url: document.getElementById('url'),
             error: document.getElementById('error'),
@@ -49,7 +50,7 @@ class YouTubeDownloader {
     }
 
     async fetchVideoInfo() {
-        const response = await fetch(`/info?url=${encodeURIComponent(this.elements.url.value)}`);
+        const response = await fetch(`${this.API_URL}/info?url=${encodeURIComponent(this.elements.url.value)}`);
         const data = await response.json();
         
         if (!response.ok) throw new Error(data.error);
@@ -93,7 +94,7 @@ class YouTubeDownloader {
             format: this.elements.format.value,
             quality: this.elements.quality.value
         });
-        return `/download?${params.toString()}`;
+        return `${this.API_URL}/download?${params.toString()}`;
     }
 
     initiateDownload(url) {
