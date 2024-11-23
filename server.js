@@ -3,76 +3,82 @@ const express = require('express');
 const cors = require('cors');
 const ytdl = require('ytdl-core');
 
-const app = express();
+// Deshabilitar la verificación de actualizaciones
+process.env.YTDL_NO_UPDATE = 'true';
 
-// Configuración de CORS simplificada
+const app = express();
 app.use(cors());
 
-// Middleware para logging
-app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
-  next();
-});
-
-// Ruta para obtener información del video
 app.get('/info', async (req, res) => {
   try {
     const { url } = req.query;
-    console.log('Processing URL:', url); // Log de la URL
+    console.log('Processing URL:', url);
 
     if (!url) {
-      console.log('Error: No URL provided');
       return res.status(400).json({ error: 'URL is required' });
     }
 
-    // Validar que es una URL de YouTube válida
     if (!ytdl.validateURL(url)) {
-      console.log('Error: Invalid YouTube URL');
       return res.status(400).json({ error: 'Invalid YouTube URL' });
     }
 
-    console.log('Getting video info...');
-    const videoInfo = await ytdl.getInfo(url, {
+    const options = {
       requestOptions: {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-          'Accept-Language': 'en-US,en;q=0.5',
-          'Cookie': '' // YouTube puede requerir cookies
+          // Actualizar User-Agent
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': '*/*',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Referer': 'https://www.youtube.com/',
+          'X-YouTube-Client-Name': '1',
+          'X-YouTube-Client-Version': '2.20231121.08.00'
         }
       }
+    };
+
+    console.log('Getting video info with options:', JSON.stringify(options, null, 2));
+    
+    const videoInfo = await ytdl.getInfo(url, options);
+    console.log('Video info retrieved successfully');
+
+    const formats = videoInfo.formats.filter(format => {
+      // Filtrar solo formatos que funcionan
+      return (format.hasVideo || format.hasAudio) && 
+             format.contentLength && 
+             !format.isHLS;
     });
 
-    console.log('Video info retrieved successfully');
-    
     const response = {
       title: videoInfo.videoDetails.title,
       thumbnail: videoInfo.videoDetails.thumbnails[0].url,
-      qualities: videoInfo.formats
-        .filter(format => format.hasVideo || format.hasAudio)
-        .map(format => ({
-          itag: format.itag,
-          qualityLabel: format.qualityLabel || 'Audio only',
-          hasVideo: format.hasVideo,
-          hasAudio: format.hasAudio,
-          container: format.container,
-          codecs: format.codecs
-        }))
+      qualities: formats.map(format => ({
+        itag: format.itag,
+        qualityLabel: format.qualityLabel || 'Audio only',
+        hasVideo: format.hasVideo,
+        hasAudio: format.hasAudio,
+        container: format.container,
+        mimeType: format.mimeType
+      }))
     };
 
-    console.log('Sending response...');
     res.json(response);
   } catch (error) {
-    console.error('Error processing video:', error);
-    
-    // Mensaje de error más descriptivo
-    const errorMessage = error.message.includes('410') 
-      ? 'El video no está disponible (Error 410). YouTube puede estar bloqueando las solicitudes.'
-      : error.message;
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      statusCode: error.statusCode
+    });
 
-    res.status(500).json({ 
-      error: errorMessage,
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    // Manejar diferentes tipos de errores
+    if (error.statusCode === 410) {
+      return res.status(400).json({
+        error: 'Este video no está disponible para descarga debido a restricciones de YouTube.'
+      });
+    }
+
+    res.status(500).json({
+      error: 'Error al procesar el video. Por favor, intenta con otro video.',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
