@@ -1,15 +1,37 @@
 # DescargaYT
 
-Un descargador de videos de YouTube moderno y eficiente construido con Node.js.
-
 ## Demo en vivo
-Frontend: https://sebagutierrezf.github.io/DescargaYT/
-Backend: https://tu-backend-url.herokuapp.com
+La aplicación está disponible en: https://sebagutierrezf.github.io/DescargaYT/
 
 ## Estructura
-El proyecto está dividido en dos partes:
-- Frontend: Alojado en GitHub Pages
-- Backend: API REST alojada en un servidor (Heroku, Railway, etc.)
+El proyecto está desplegado completamente en GitHub Pages:
+- Frontend: `/docs`
+- Backend: `/backend`
+
+## Desarrollo Local
+
+1. Clonar el repositorio:
+```bash
+git clone https://github.com/sebagutierrezf/DescargaYT.git
+cd DescargaYT
+```
+
+2. Instalar dependencias:
+```bash
+npm install
+```
+
+3. Iniciar el servidor en modo desarrollo:
+```bash
+npm run dev
+```
+
+4. Abrir http://localhost:3000 en el navegador
+
+## Despliegue
+El proyecto se despliega automáticamente en GitHub Pages cuando se hace push a main.
+- Frontend: Los archivos en `/docs` se despliegan en la raíz
+- Backend: Los archivos del servidor se despliegan en `/backend`
 
 ## Configuración
 
@@ -24,24 +46,6 @@ El proyecto está dividido en dos partes:
      PORT=3000
      CORS_ORIGIN=https://sebagutierrezf.github.io
      ```
-
-## Despliegue
-
-### Backend
-El backend se despliega automáticamente en GitHub Container Registry cuando se hace push a main.
-
-Para ejecutar el contenedor localmente:
-
-```bash
-# Descargar la imagen
-docker pull ghcr.io/sebagutierrezf/descargayt:latest
-
-# Ejecutar el contenedor
-docker run -p 3000:3000 ghcr.io/sebagutierrezf/descargayt:latest
-```
-
-### Frontend
-El frontend se despliega automáticamente en GitHub Pages.
 
 ## Seguridad
 El proyecto implementa las siguientes medidas de seguridad:

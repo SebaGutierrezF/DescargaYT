@@ -13,7 +13,7 @@ class VideoDownloader {
 
     setupMiddleware() {
         this.app.use(cors({
-            origin: ['https://sebagutierrezf.github.io', 'http://localhost:3000'],
+            origin: true,
             methods: ['GET', 'POST'],
             credentials: true,
             allowedHeaders: ['Content-Type', 'Authorization']
@@ -28,12 +28,14 @@ class VideoDownloader {
         });
 
         this.app.use(express.json());
-        this.app.use(express.static('docs'));
+        
+        // Servir archivos estáticos desde la carpeta docs
+        this.app.use('/DescargaYT', express.static('docs'));
     }
 
     setupRoutes() {
-        this.app.get('/info', this.getVideoInfo.bind(this));
-        this.app.get('/download', this.downloadVideo.bind(this));
+        this.app.get('/DescargaYT/backend/info', this.getVideoInfo.bind(this));
+        this.app.get('/DescargaYT/backend/download', this.downloadVideo.bind(this));
     }
 
     async getVideoInfo(req, res) {

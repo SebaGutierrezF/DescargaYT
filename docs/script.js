@@ -1,6 +1,6 @@
 class YouTubeDownloader {
     constructor() {
-        this.API_URL = 'https://youtube-downloader-backend.sebagutierrezf.com';
+        this.API_URL = `${window.location.origin}/DescargaYT/backend`;
         this.elements = {
             url: document.getElementById('url'),
             error: document.getElementById('error'),
