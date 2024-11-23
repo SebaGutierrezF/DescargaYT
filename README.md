@@ -1,6 +1,26 @@
 # DescargaYT
 
-Descargador de videos de YouTube usando Cloudflare Workers y GitHub Pages.
+## Configuración de Variables de Entorno
+
+1. Copia `.env.example` a `.env`:
+```bash
+cp .env.example .env
+```
+
+2. Configura tus variables en `.env`
+
+3. Configura los secretos en GitHub:
+   - CF_API_TOKEN
+   - CF_ACCOUNT_ID
+   - YOUTUBE_API_KEY
+
+4. Configura los secretos en Cloudflare Workers:
+```bash
+npx wrangler secret put YOUTUBE_API_KEY
+npx wrangler secret put CF_API_TOKEN
+```
+
+⚠️ IMPORTANTE: Nunca subas el archivo `.env` a GitHub
 
 ## Estructura
 - `/docs`: Frontend (GitHub Pages)

@@ -1,10 +1,13 @@
 name = "youtube-downloader"
 main = "src/worker.js"
-compatibility_date = "2024-01-01"
-account_id = "fccc15afa453ea68debf4a976cb3627e"
+compatibility_date = "2024-09-24"
 
 [vars]
 ALLOWED_ORIGINS = "https://sebagutierrezf.github.io"
+
+# Las variables secretas se configurarán usando wrangler secret
+# npx wrangler secret put AIzaSyA-63NUex9DDsLfotTHDUeiVmI5cDs_x_c
+# npx wrangler secret put qv5itRdEn4BVmyG1094ve5sJ_fxDN9kcl-cpaJsi
 
 [[rules]]
 type = "ESModule"

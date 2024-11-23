@@ -82,4 +82,11 @@ async function handleRequest(request) {
       }
     });
   }
-} 
+}
+
+// Exportar el objeto worker
+export default {
+  fetch: async function(request, env, ctx) {
+    return handleRequest(request);
+  }
+}; 

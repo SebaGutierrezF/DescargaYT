@@ -1,0 +1,8 @@
+{
+  "apiEndpoints": {
+    "worker": "https://youtube-downloader.workers.dev",
+    "download": "https://descargayt.onrender.com"
+  },
+  "allowedFormats": ["mp4", "mp3"],
+  "maxFileSize": "2GB"
+} 

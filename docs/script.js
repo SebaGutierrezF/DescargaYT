@@ -1,6 +1,7 @@
 class YouTubeDownloader {
     constructor() {
         this.API_URL = 'https://youtube-downloader.workers.dev';
+        this.DOWNLOAD_SERVER = 'https://descargayt.onrender.com';
         this.elements = {
             url: document.getElementById('url'),
             error: document.getElementById('error'),
@@ -112,20 +113,7 @@ class YouTubeDownloader {
     }
 
     initiateDownload(url) {
-        try {
-            const link = document.createElement('a');
-            link.href = url;
-            link.rel = 'noopener noreferrer';
-            link.target = '_blank';
-            link.download = '';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            this.finalizeDownload();
-        } catch (error) {
-            console.error('Error initiating download:', error);
-            this.showError('Error al iniciar la descarga');
-        }
+        window.location.href = url;
     }
 
     showProgressUI() {
