@@ -17,27 +17,27 @@ cp .env.example .env
 
 1. Instalar dependencias:
 ```bash
-yarn install
+npm ci
 ```
 
 2. Iniciar desarrollo:
 ```bash
-yarn dev
+npm run dev
 ```
 
-## Despliegue
-
-### Frontend
-Se despliega automáticamente a GitHub Pages al hacer push a main.
-
-### Backend
-Se despliega automáticamente a Render al hacer push a main.
-
 ## Variables de Entorno
-Crear en Render:
+Configurar en GitHub Secrets:
 - `YOUTUBE_API_KEY`: Clave de API de YouTube
+- `PO_TOKEN`: Token de YouTube
 - `FRONTEND_URL`: URL del frontend
 - `ALLOWED_ORIGINS`: Orígenes permitidos para CORS
+
+## Despliegue
+El proyecto se despliega automáticamente a:
+- Frontend: GitHub Pages
+- Backend: Render
+
+Los despliegues se activan al hacer push a la rama main.
 
 ## Licencia
 ISC
