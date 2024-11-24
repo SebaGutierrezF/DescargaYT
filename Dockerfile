@@ -1,10 +1,4 @@
-FROM node:16
-
-# Instalar Chrome
-RUN apt-get update && apt-get install -y \
-    chromium \
-    chromium-driver \
-    && rm -rf /var/lib/apt/lists/*
+FROM node:18-slim
 
 WORKDIR /app
 
