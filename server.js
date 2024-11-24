@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const youtubedl = require('youtube-dl-exec');
@@ -7,7 +8,6 @@ const fs = require('fs').promises;
 const app = express();
 app.use(cors());
 
-// Crear archivo de cookies
 const COOKIES_CONTENT = `# Netscape HTTP Cookie File
 .youtube.com	TRUE	/	TRUE	2597573456	VISITOR_INFO1_LIVE	iM7JxrxvQCE
 .youtube.com	TRUE	/	TRUE	2597573456	CONSENT	YES+
@@ -16,7 +16,6 @@ const COOKIES_CONTENT = `# Netscape HTTP Cookie File
 
 const COOKIES_PATH = path.join(__dirname, 'cookies.txt');
 
-// Función para inicializar las cookies
 async function initCookies() {
   try {
     await fs.writeFile(COOKIES_PATH, COOKIES_CONTENT);
@@ -34,7 +33,6 @@ app.get('/info', async (req, res) => {
       return res.status(400).json({ error: 'URL is required' });
     }
 
-    // Asegurarse de que el archivo de cookies existe
     await initCookies();
 
     const options = {
@@ -45,6 +43,9 @@ app.get('/info', async (req, res) => {
       preferFreeFormats: true,
       youtubeSkipDashManifest: true,
       cookies: COOKIES_PATH,
+      extractorArgs: [
+        `youtube:player-client=web,default;po_token=web+${process.env.PO_TOKEN}`
+      ],
       addHeader: [
         'User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Accept:text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
@@ -53,7 +54,11 @@ app.get('/info', async (req, res) => {
       ]
     };
 
-    console.log('Getting video info with options:', JSON.stringify(options, null, 2));
+    console.log('Getting video info with options:', {
+      ...options,
+      extractorArgs: options.extractorArgs // Log para verificar el token
+    });
+
     const videoInfo = await youtubedl(url, options);
 
     const response = {
@@ -83,5 +88,6 @@ app.get('/info', async (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  initCookies(); // Inicializar cookies al arrancar
+  console.log('PO Token configured:', process.env.PO_TOKEN ? 'Yes' : 'No');
+  initCookies();
 }); 

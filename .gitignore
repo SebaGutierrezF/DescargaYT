@@ -1,8 +1,12 @@
 # Dependencies
 node_modules/
 
-# Environment y Secretos
+# Environment variables
 .env
+.env.local
+.env.*.local
+
+# Environment y Secretos
 .env.development
 *.local.json
 config.local.json
