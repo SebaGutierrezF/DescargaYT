@@ -19,15 +19,20 @@ const COOKIES_CONTENT = `# Netscape HTTP Cookie File
 .youtube.com	TRUE	/	TRUE	2597573456	CONSENT	YES+cb7
 .youtube.com	TRUE	/	TRUE	2597573456	GPS	1
 .youtube.com	TRUE	/	TRUE	2597573456	VISITOR_INFO1_LIVE	${process.env.VISITOR_INFO1_LIVE}
-.youtube.com	TRUE	/	TRUE	2597573456	YSC	${process.env.YSC}`;
+.youtube.com	TRUE	/	TRUE	2597573456	YSC	${process.env.YSC}
+.youtube.com	TRUE	/	TRUE	2597573456	LOGIN_INFO	${process.env.LOGIN_INFO || ''}
+.youtube.com	TRUE	/	TRUE	2597573456	PREF	${process.env.PREF || 'f4=4000000&tz=America.Santiago'}`;
 
 const COOKIES_PATH = path.join(__dirname, 'cookies.txt');
 
 // Inicialización de cookies
 async function initCookies() {
   try {
-    await fs.writeFile(COOKIES_PATH, COOKIES_CONTENT);
+    await fs.writeFile(COOKIES_PATH, COOKIES_CONTENT, { mode: 0o666 });
     console.log('✅ Cookies file created successfully');
+    // Verificar que el archivo se creó correctamente
+    const content = await fs.readFile(COOKIES_PATH, 'utf8');
+    console.log('📝 Cookies file content length:', content.length);
   } catch (error) {
     console.error('❌ Error creating cookies file:', error);
     throw error;
@@ -47,7 +52,10 @@ const getYoutubeDLOptions = () => ({
     `youtube:player-client=web,default;po_token=web+${process.env.PO_TOKEN}`
   ],
   addHeader: [
-    'User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    'User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Accept:text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+    'Accept-Language:en-US,en;q=0.5',
+    'Connection:keep-alive'
   ]
 });
 
@@ -60,7 +68,8 @@ const processVideoFormats = (formats) => {
       qualityLabel: format.height ? `${format.height}p` : 'Audio only',
       hasVideo: format.vcodec !== 'none',
       hasAudio: format.acodec !== 'none',
-      container: format.ext || 'mp4'
+      container: format.ext || 'mp4',
+      url: format.url || ''
     }));
 };
 
@@ -76,7 +85,10 @@ app.get('/info', async (req, res) => {
     await initCookies();
     
     console.log('📹 Fetching video info for URL:', url);
-    const videoInfo = await youtubedl(url, getYoutubeDLOptions());
+    const options = getYoutubeDLOptions();
+    console.log('🔧 Using options:', JSON.stringify(options, null, 2));
+    
+    const videoInfo = await youtubedl(url, options);
 
     if (!videoInfo || !videoInfo.title) {
       console.error('❌ Invalid video info received:', videoInfo);
@@ -117,11 +129,18 @@ app.get('/info', async (req, res) => {
 
 // Inicialización del servidor
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log('🌍 Environment:', process.env.NODE_ENV);
   console.log('🔑 PO Token configured:', process.env.PO_TOKEN ? 'Yes' : 'No');
   console.log('🍪 Cookies configured:', process.env.VISITOR_INFO1_LIVE && process.env.YSC ? 'Yes' : 'No');
+  
+  // Inicializar cookies al arrancar
+  try {
+    await initCookies();
+  } catch (error) {
+    console.error('❌ Failed to initialize cookies:', error);
+  }
 });
 
 // Manejo de errores no capturados
