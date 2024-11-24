@@ -47,7 +47,7 @@ const getYoutubeDLOptions = () => ({
   noCheckCertificate: true,
   preferFreeFormats: true,
   youtubeSkipDashManifest: true,
-  cookies: COOKIES_PATH,
+  cookies: path.join(__dirname, 'cookies.txt'),
   extractorArgs: [
     `youtube:player-client=web,default;po_token=web+${process.env.PO_TOKEN}`
   ],
